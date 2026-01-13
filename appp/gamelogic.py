@@ -65,6 +65,16 @@ while game_on:
         print("You dont have the authority to move this piece")
         continue
 
+#Capturing own piece 
+    if src.isupper() and target.isupper():
+        print("Your piece already exists here ")
+        continue
+
+    if src.islower() and target.islower():
+        print("Your piece already exists here ")
+        continue
+    #PROMOTION
+    
     # save move state before board mutation 
     one_move = {
         "from": source_square,
