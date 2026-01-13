@@ -15,9 +15,9 @@ def create_initial_board():
             square = file + rank
 
             if rank == '2':
-                board[square] = 'P'      
+                board[square] = 'P'
             elif rank == '7':
-                board[square] = 'p'          
+                board[square] = 'p'
             elif rank == '1':
                 board[square] = white_back_rank[i]
             elif rank == '8':
@@ -26,42 +26,56 @@ def create_initial_board():
                 board[square] = None
 
     return board
-turn = 1
-board= create_initial_board()
-game_on= True
-while game_on:
-    if turn % 2 != 0:
-        move= input("User, Input your move?\n")
-        source_square, target_square= move.split(sep=" ")
-        try:
-            board[source_square] and board[target_square]
-        except KeyError:
-            print("Invalid source square and or target square")
-            pass
-        if board[source_square] == None:
-            print("Invalid source square or move from ")
-            pass
-        else:
-            item = board[source_square]
-            board[source_square]= None
-            board[target_square]= item
-            turn += 1
 
+
+turn = 1
+board = create_initial_board()
+moves = []
+game_on = True
+
+while game_on:
+
+    if turn % 2 != 0:
+        move = input("User, Input your move?\n")
     else:
         move = input("Bot/Admin, input your move?\n")
-        source_square, target_square= move.split(sep=" ")
-        try:
-            board[source_square] and board[target_square]
-        except KeyError:
-            print("Invalid source square and or target square")
-            pass
-        if board[source_square] == None:
-            print("Invalid source square or move from ")
-            pass
-        else:
-            item = board[source_square]
-            board[source_square]= None
-            board[target_square]= item
-            turn += 1 
-    print(board)
-    
+
+    try:
+        source_square, target_square = move.split(" ")
+    except ValueError:
+        print("Not enough values to unpack")
+        continue
+
+    try:
+        src = board[source_square]
+        target = board[target_square]
+    except KeyError:
+        print("Invalid source square and or target square")
+        continue
+
+    if src is None:
+        print("Invalid source square or move from")
+        continue
+
+    if turn % 2 != 0 and not src.isupper():
+        print("You dont have the authority to move this piece")
+        continue
+
+    if turn % 2 == 0 and not src.islower():
+        print("You dont have the authority to move this piece")
+        continue
+
+    # save move state before board mutation 
+    one_move = {
+        "from": source_square,
+        "to": target_square,
+        "moved": src,
+        "captured": target
+    }
+    moves.append(one_move)
+
+    # ---- apply move ----
+    board[source_square] = None
+    board[target_square] = src
+
+    turn += 1
