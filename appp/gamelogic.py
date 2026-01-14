@@ -75,3 +75,44 @@ def save_move(moves, source_square, target_square, src, target):
 def apply_move(board, source_square, target_square, src):
     board[source_square] = None
     board[target_square] = src
+
+turn = 1
+board = create_initial_board()
+moves = []
+game_on = True
+
+while game_on:
+
+    move = get_move(turn)
+
+    source_square, target_square = parse_move(move)
+    if not source_square or not target_square:
+        print("Not enough values to unpack")
+        continue
+
+    src, target = fetch_pieces(board, source_square, target_square)
+    if src is None and target is None:
+        print("Invalid source square and or target square")
+        continue
+
+    if src is None:
+        print("Invalid source square or move from")
+        continue
+
+    if not validate_turn(src, turn):
+        print("You dont have the authority to move this piece")
+        continue
+
+    if capturing_own_piece(src, target):
+        print("Your piece already exists here")
+        continue
+
+    # save move state before mutation
+    save_move(moves, source_square, target_square, src, target)
+
+    # apply move
+    apply_move(board, source_square, target_square, src)
+
+    # promotion hook will be here
+
+    turn += 1
