@@ -76,6 +76,77 @@ def apply_move(board, source_square, target_square, src):
     board[source_square] = None
     board[target_square] = src
 
+def check_promotion(piece, target_square):
+    if piece == 'P' and target_square.endswith('8'):
+        return True
+    if piece == 'p' and target_square.endswith('1'):
+        return True
+    return False
+
+def get_promotion_piece(pawn):
+    if pawn == 'P':
+        valid = ['Q', 'R', 'B', 'N']
+        default = 'Q'
+    else:
+        valid = ['q', 'r', 'b', 'n']
+        default = 'q'
+
+    choice = input("Promote pawn to (Q, R, B, N) [default Q]: ").strip()
+
+    if choice == "":
+        return default
+
+    if choice in valid:
+        return choice
+
+    print("Invalid choice, defaulting to Queen")
+    return default
+
+
+def apply_promotion(board, target_square, promotion_piece):
+    board[target_square] = promotion_piece
+
+def validate_pawn_move(board, source_square, target_square, piece):
+    # split the squares
+    src_file = source_square[0]
+    src_rank = int(source_square[1])
+    tgt_file = target_square[0]
+    tgt_rank = int(target_square[1])
+
+    # differences
+    file_diff = ord(tgt_file) - ord(src_file)  # +1 right, -1 left
+    rank_diff = tgt_rank - src_rank            # +1 up (white), -1 down (black)
+
+    if piece == 'P':  # White pawn
+        # Forward 1
+        if file_diff == 0 and rank_diff == 1 and board[target_square] is None:
+            return True
+        # Forward 2 from rank 2
+        if file_diff == 0 and rank_diff == 2 and src_rank == 2:
+            intermediate_square = src_file + str(src_rank + 1)
+            if board[intermediate_square] is None and board[target_square] is None:
+                return True
+        # Diagonal capture
+        if abs(file_diff) == 1 and rank_diff == 1:
+            if board[target_square] is not None and board[target_square].islower():
+                return True
+        return False
+
+    elif piece == 'p':  # Black pawn
+        # Forward 1
+        if file_diff == 0 and rank_diff == -1 and board[target_square] is None:
+            return True
+        # Forward 2 from rank 7
+        if file_diff == 0 and rank_diff == -2 and src_rank == 7:
+            intermediate_square = src_file + str(src_rank - 1)
+            if board[intermediate_square] is None and board[target_square] is None:
+                return True
+        # Diagonal capture
+        if abs(file_diff) == 1 and rank_diff == -1:
+            if board[target_square] is not None and board[target_square].isupper():
+                return True
+        return False
+
 turn = 1
 board = create_initial_board()
 moves = []
@@ -114,5 +185,9 @@ while game_on:
     apply_move(board, source_square, target_square, src)
 
     # promotion hook will be here
-
+    if check_promotion(src, target_square):
+    # ask user what to promote to
+        piece = get_promotion_piece(src)
+    # replace board[target_square]
+        apply_promotion(board,target_square,piece)
     turn += 1
