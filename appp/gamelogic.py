@@ -1,6 +1,3 @@
-# import chess.engine
-# import chess
-
 def create_initial_board():
     board = {}
 
@@ -28,54 +25,44 @@ def create_initial_board():
     return board
 
 
-turn = 1
-board = create_initial_board()
-moves = []
-game_on = True
-
-while game_on:
-
+def get_move(turn):
     if turn % 2 != 0:
-        move = input("User, Input your move?\n")
+        return input("User, Input your move?\n")
     else:
-        move = input("Bot/Admin, input your move?\n")
+        return input("Bot/Admin, input your move?\n")
 
+
+def parse_move(move):
     try:
-        source_square, target_square = move.split(" ")
+        return move.split(" ")
     except ValueError:
-        print("Not enough values to unpack")
-        continue
+        return None, None
 
+
+def fetch_pieces(board, source_square, target_square):
     try:
-        src = board[source_square]
-        target = board[target_square]
+        return board[source_square], board[target_square]
     except KeyError:
-        print("Invalid source square and or target square")
-        continue
+        return None, None
 
-    if src is None:
-        print("Invalid source square or move from")
-        continue
 
+def validate_turn(src, turn):
     if turn % 2 != 0 and not src.isupper():
-        print("You dont have the authority to move this piece")
-        continue
-
+        return False
     if turn % 2 == 0 and not src.islower():
-        print("You dont have the authority to move this piece")
-        continue
+        return False
+    return True
 
-#Capturing own piece 
-    if src.isupper() and target.isupper():
-        print("Your piece already exists here ")
-        continue
 
-    if src.islower() and target.islower():
-        print("Your piece already exists here ")
-        continue
-    #PROMOTION
-    
-    # save move state before board mutation 
+def capturing_own_piece(src, target):
+    if src.isupper() and target is not None and target.isupper():
+        return True
+    if src.islower() and target is not None and target.islower():
+        return True
+    return False
+
+
+def save_move(moves, source_square, target_square, src, target):
     one_move = {
         "from": source_square,
         "to": target_square,
@@ -84,8 +71,7 @@ while game_on:
     }
     moves.append(one_move)
 
-    # ---- apply move ----
+
+def apply_move(board, source_square, target_square, src):
     board[source_square] = None
     board[target_square] = src
-
-    turn += 1
