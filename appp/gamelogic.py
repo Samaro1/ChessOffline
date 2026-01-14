@@ -147,6 +147,74 @@ def validate_pawn_move(board, source_square, target_square, piece):
                 return True
         return False
 
+def validate_knight_move(board, source_square, target_square, piece):
+    # split the squares
+    src_file = source_square[0]
+    src_rank = int(source_square[1])
+    tgt_file = target_square[0]
+    tgt_rank = int(target_square[1])
+
+    # differences
+    file_diff = abs(ord(tgt_file) - ord(src_file))  # how many columns moved
+    rank_diff = abs(tgt_rank - src_rank)           # how many rows moved
+
+    # knight moves must be 2 + 1 positive or negative doesnt matter
+    if (file_diff == 2 and rank_diff == 1) or (file_diff == 1 and rank_diff == 2):
+        # check capturing own piece
+        target = board[target_square]
+        if target is None:
+            return True
+        if piece.isupper() and target.islower():
+            return True
+        if piece.islower() and target.isupper():
+            return True
+    return False
+
+def validate_rook_move(board, source_square, target_square, piece):
+    src_file = source_square[0]
+    src_rank = int(source_square[1])
+    tgt_file = target_square[0]
+    tgt_rank = int(target_square[1])
+
+    # differences
+    file_diff = ord(tgt_file) - ord(src_file)
+    rank_diff = tgt_rank - src_rank
+
+    # Rook must move in a straight line
+    if file_diff != 0 and rank_diff != 0:
+        return False  # moving diagonally is illegal
+
+    # Determine step direction
+    step_file = 0
+    step_rank = 0
+    if file_diff != 0:
+        step_file = 1 if file_diff > 0 else -1
+    elif rank_diff != 0:
+        step_rank = 1 if rank_diff > 0 else -1
+
+    # Check each square along the path (excluding source and target)
+    current_file = ord(src_file) + step_file
+    current_rank = src_rank + step_rank
+
+    while (current_file != ord(tgt_file) or current_rank != tgt_rank):
+        square = chr(current_file) + str(current_rank)
+        if board[square] is not None:
+            return False  # path is blocked
+        current_file += step_file
+        current_rank += step_rank
+
+    # Final square: either empty or opponent piece
+    target = board[target_square]
+    if target is None:
+        return True
+    if piece.isupper() and target.islower():
+        return True
+    if piece.islower() and target.isupper():
+        return True
+
+    # Cannot capture own piece
+    return False
+
 turn = 1
 board = create_initial_board()
 moves = []
