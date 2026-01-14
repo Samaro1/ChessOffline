@@ -215,6 +215,146 @@ def validate_rook_move(board, source_square, target_square, piece):
     # Cannot capture own piece
     return False
 
+def validate_bishop_move(board, source_square, target_square, piece):
+    # split the squares
+    src_file = source_square[0]
+    src_rank = int(source_square[1])
+    tgt_file = target_square[0]
+    tgt_rank = int(target_square[1])
+
+    # differences
+    file_diff = ord(tgt_file) - ord(src_file)
+    rank_diff = tgt_rank - src_rank
+
+    # Bishop must move diagonally
+    if abs(file_diff) != abs(rank_diff):
+        return False
+
+    # Determine step direction (+1 or -1)
+    step_file = 1 if file_diff > 0 else -1
+    step_rank = 1 if rank_diff > 0 else -1
+
+    # Start checking from first square after source
+    current_file = ord(src_file) + step_file
+    current_rank = src_rank + step_rank
+
+    while current_file != ord(tgt_file) and current_rank != tgt_rank:
+        square = chr(current_file) + str(current_rank)
+        if board[square] is not None:
+            return False  # path is blocked
+        current_file += step_file
+        current_rank += step_rank
+
+    # Final square: empty or opponent piece
+    target = board[target_square]
+    if target is None:
+        return True
+    if piece.isupper() and target.islower():
+        return True
+    if piece.islower() and target.isupper():
+        return True
+
+    return False  # cannot capture own piece
+def validate_queen_move(board, source_square, target_square, piece):
+    src_file = source_square[0]
+    src_rank = int(source_square[1])
+    tgt_file = target_square[0]
+    tgt_rank = int(target_square[1])
+
+    # differences
+    file_diff = ord(tgt_file) - ord(src_file)
+    rank_diff = tgt_rank - src_rank
+
+    # Check if it's a straight line (rook-like) or diagonal (bishop-like)
+    if file_diff == 0 or rank_diff == 0:
+        # straight line 
+        step_file = 0 if file_diff == 0 else (1 if file_diff > 0 else -1)
+        step_rank = 0 if rank_diff == 0 else (1 if rank_diff > 0 else -1)
+    elif abs(file_diff) == abs(rank_diff):
+        # diagonal 
+        step_file = 1 if file_diff > 0 else -1
+        step_rank = 1 if rank_diff > 0 else -1
+    else:
+        # not straight or diagonal → illegal
+        return False
+
+    # check path (all squares between source and target)
+    current_file = ord(src_file) + step_file
+    current_rank = src_rank + step_rank
+
+    while current_file != ord(tgt_file) or current_rank != tgt_rank:
+        square = chr(current_file) + str(current_rank)
+        if board[square] is not None:
+            return False  # path blocked
+        current_file += step_file
+        current_rank += step_rank
+
+    # final square: empty or opponent piece
+    target = board[target_square]
+    if target is None:
+        return True
+    if piece.isupper() and target.islower():
+        return True
+    if piece.islower() and target.isupper():
+        return True
+
+    return False  # cannot capture own piece
+
+def validate_king_move(board, source_square, target_square, piece):
+    src_file = source_square[0]
+    src_rank = int(source_square[1])
+    tgt_file = target_square[0]
+    tgt_rank = int(target_square[1])
+
+    # differences
+    file_diff = abs(ord(tgt_file) - ord(src_file))
+    rank_diff = abs(tgt_rank - src_rank)
+
+    # King can only move 1 square in any direction
+    if file_diff > 1 or rank_diff > 1:
+        return False
+
+    # Cannot capture own piece
+    target = board[target_square]
+    if target is None:
+        return True
+    if piece.isupper() and target.islower():
+        return True
+    if piece.islower() and target.isupper():
+        return True
+
+    return False  # target is own piece
+
+def validate_move(board, source_square, target_square, piece):
+    # Ownership check
+    if piece.isupper():
+        player = "white"
+    else:
+        player = "black"
+
+    target = board[target_square]
+    if target is not None:
+        if piece.isupper() and target.isupper():
+            return False  # cannot capture own piece
+        if piece.islower() and target.islower():
+            return False  # cannot capture own piece
+
+    # Delegate to piece-specific validator
+    if piece.upper() == 'P':
+        return validate_pawn_move(board, source_square, target_square, piece)
+    elif piece.upper() == 'N':
+        return validate_knight_move(board, source_square, target_square, piece)
+    elif piece.upper() == 'R':
+        return validate_rook_move(board, source_square, target_square, piece)
+    elif piece.upper() == 'B':
+        return validate_bishop_move(board, source_square, target_square, piece)
+    elif piece.upper() == 'Q':
+        return validate_queen_move(board, source_square, target_square, piece)
+    elif piece.upper() == 'K':
+        return validate_king_move(board, source_square, target_square, piece)
+    
+    return False
+
 turn = 1
 board = create_initial_board()
 moves = []
