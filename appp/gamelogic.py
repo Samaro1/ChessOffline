@@ -25,6 +25,20 @@ def create_initial_board():
     return board
 
 
+def print_board(board):
+    files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    ranks = ['8', '7', '6', '5', '4', '3', '2', '1']
+
+    print()
+    for rank in ranks:
+        row = []
+        for file in files:
+            piece = board[file + rank]
+            row.append(piece if piece is not None else '.')
+        print(rank, ' '.join(row))
+    print("  a b c d e f g h\n")
+
+
 def get_move(turn):
     if turn % 2 != 0:
         return input("User, Input your move?\n")
@@ -325,77 +339,204 @@ def validate_king_move(board, source_square, target_square, piece):
 
     return False  # target is own piece
 
-def validate_move(board, source_square, target_square, piece):
-    # Ownership check
-    if piece.isupper():
-        player = "white"
-    else:
-        player = "black"
+def validate_move(board, source, target, last_move):
+    piece = board[source]
+    if piece is None:
+        return False
 
-    target = board[target_square]
-    if target is not None:
-        if piece.isupper() and target.isupper():
-            return False  # cannot capture own piece
-        if piece.islower() and target.islower():
-            return False  # cannot capture own piece
+    # prevent capturing own piece
+    target_piece = board[target]
+    if target_piece is not None and piece.isupper() == target_piece.isupper():
+        return False
 
-    # Delegate to piece-specific validator
-    if piece.upper() == 'P':
-        return validate_pawn_move(board, source_square, target_square, piece)
-    elif piece.upper() == 'N':
-        return validate_knight_move(board, source_square, target_square, piece)
-    elif piece.upper() == 'R':
-        return validate_rook_move(board, source_square, target_square, piece)
-    elif piece.upper() == 'B':
-        return validate_bishop_move(board, source_square, target_square, piece)
-    elif piece.upper() == 'Q':
-        return validate_queen_move(board, source_square, target_square, piece)
-    elif piece.upper() == 'K':
-        return validate_king_move(board, source_square, target_square, piece)
-    
+    # ---- PAWN ----
+    if piece in ('P', 'p'):
+        # en passant has priority over normal pawn capture
+        if validate_en_passant(board, source, target, last_move):
+            return True
+        return validate_pawn_move(board, source, target)
+
+    # ---- KNIGHT ----
+    if piece in ('N', 'n'):
+        return validate_knight_move(source, target)
+
+    # ---- BISHOP ----
+    if piece in ('B', 'b'):
+        return validate_bishop_move(board, source, target)
+
+    # ---- ROOK ----
+    if piece in ('R', 'r'):
+        return validate_rook_move(board, source, target)
+
+    # ---- QUEEN ----
+    if piece in ('Q', 'q'):
+        return validate_queen_move(board, source, target)
+
+    # ---- KING ----
+    if piece in ('K', 'k'):
+        # castling checked before normal king move
+        if validate_castling(board, source, target):
+            return True
+        return validate_king_move(source, target)
+
     return False
 
-turn = 1
+
+def validate_en_passant(board, source, target, last_move):
+    if last_move is None:
+        return False
+
+    src_piece = board[source]
+    if src_piece not in ('P', 'p'):
+        return False
+
+    src_file = source[0]
+    src_rank = int(source[1])
+    tgt_file = target[0]
+    tgt_rank = int(target[1])
+
+    last_from = last_move["from"]
+    last_to = last_move["to"]
+    last_piece = last_move["moved"]
+
+    # last move must be a pawn moving two squares
+    if last_piece not in ('P', 'p'):
+        return False
+
+    if abs(int(last_from[1]) - int(last_to[1])) != 2:
+        return False
+
+    # pawns must be adjacent
+    if abs(ord(src_file) - ord(last_to[0])) != 1:
+        return False
+
+    # target square must be empty
+    if board[target] is not None:
+        return False
+
+    # direction logic
+    if src_piece == 'P':
+        return (
+            src_rank == 5 and
+            tgt_rank == 6 and
+            tgt_file == last_to[0]
+        )
+
+    if src_piece == 'p':
+        return (
+            src_rank == 4 and
+            tgt_rank == 3 and
+            tgt_file == last_to[0]
+        )
+
+    return False
+
+def apply_en_passant(board, source, target):
+    captured_square = target[0] + source[1]  # pawn has to be behind target
+    board[target] = board[source]
+    board[source] = None
+    board[captured_square] = None
+
+def validate_castling(board, source, target):
+    piece = board[source]
+    if piece not in ('K', 'k'):
+        return False
+
+    src_file = source[0]
+    src_rank = source[1]
+    tgt_file = target[0]
+    tgt_rank = target[1]
+
+    # king must stay on same rank
+    if src_rank != tgt_rank:
+        return False
+
+    # king moves exactly two files
+    if abs(ord(src_file) - ord(tgt_file)) != 2:
+        return False
+
+    # determine rook positions
+    if tgt_file > src_file:  # king side
+        rook_file = 'h'
+        path_files = ['f', 'g']
+    else:  # queen side
+        rook_file = 'a'
+        path_files = ['b', 'c', 'd']
+
+    rook_square = rook_file + src_rank
+    rook = board.get(rook_square)
+
+    if rook is None:
+        return False
+
+    if piece.isupper() and rook != 'R':
+        return False
+
+    if piece.islower() and rook != 'r':
+        return False
+
+    # path must be empty
+    for f in path_files:
+        if board[f + src_rank] is not None:
+            return False
+
+    return True
+
+def apply_castling(board, source, target):
+    king = board[source]
+    rank = source[1]
+
+    if target[0] > source[0]:  # king side
+        rook_from = 'h' + rank
+        rook_to = 'f' + rank
+    else:  # queen side
+        rook_from = 'a' + rank
+        rook_to = 'd' + rank
+
+    board[target] = king
+    board[source] = None
+    board[rook_to] = board[rook_from]
+    board[rook_from] = None
+
+
 board = create_initial_board()
 moves = []
 game_on = True
+turn = 'white'
 
-while game_on:
-
-    move = get_move(turn)
-
-    source_square, target_square = parse_move(move)
-    if not source_square or not target_square:
-        print("Not enough values to unpack")
+while True:
+    move = input("Enter move (e2 e4): ").split()
+    if len(move) != 2:
+        print("Invalid input format")
         continue
 
-    src, target = fetch_pieces(board, source_square, target_square)
-    if src is None and target is None:
-        print("Invalid source square and or target square")
+    source, target = move
+
+    if source not in board or target not in board:
+        print("Invalid square")
         continue
 
-    if src is None:
-        print("Invalid source square or move from")
+    piece = board[source]
+    if piece is None:
+        print("No piece on source square")
         continue
 
-    if not validate_turn(src, turn):
-        print("You dont have the authority to move this piece")
+    if turn == 'white' and not piece.isupper():
+        print("White to move")
+        continue
+    if turn == 'black' and not piece.islower():
+        print("Black to move")
         continue
 
-    if capturing_own_piece(src, target):
-        print("Your piece already exists here")
+    if not validate_move(board, source, target):
+        print("Illegal move")
         continue
 
-    # save move state before mutation
-    save_move(moves, source_square, target_square, src, target)
+    board[target] = board[source]
+    board[source] = None
 
-    # apply move
-    apply_move(board, source_square, target_square, src)
+    # promotion hook
 
-    # promotion hook will be here
-    if check_promotion(src, target_square):
-    # ask user what to promote to
-        piece = get_promotion_piece(src)
-    # replace board[target_square]
-        apply_promotion(board,target_square,piece)
-    turn += 1
+    turn = 'black' if turn == 'white' else 'white'
+    print_board(board)
+
