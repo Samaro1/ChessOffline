@@ -498,6 +498,80 @@ def apply_castling(board, source, target):
     board[rook_to] = board[rook_from]
     board[rook_from] = None
 
+def find_king(board, is_white):
+    king = 'K' if is_white else 'k'
+    for square, piece in board.items():
+        if piece == king:
+            return square
+    return None
+
+def is_square_attacked(board, target_square, by_white):
+
+    for source_square, piece in board.items():
+
+        # skip empty squares
+        if piece is None:
+            continue
+
+        # skip pieces of the wrong color
+        if by_white and piece.islower():
+            continue
+
+        if not by_white and piece.isupper():
+            continue
+
+        # PAWN attacks
+        if piece == 'P' or piece == 'p':
+            if pawn_attacks_square(source_square, target_square, piece):
+                return True
+
+        # KNIGHT attacks
+        elif piece == 'N' or piece == 'n':
+            if validate_knight_move(source_square, target_square):
+                return True
+
+        # BISHOP attacks
+        elif piece == 'B' or piece == 'b':
+            if validate_bishop_move(board, source_square, target_square):
+                return True
+
+        # ROOK attacks
+        elif piece == 'R' or piece == 'r':
+            if validate_rook_move(board, source_square, target_square):
+                return True
+
+        # QUEEN attacks
+        elif piece == 'Q' or piece == 'q':
+            if validate_queen_move(board, source_square, target_square):
+                return True
+
+        # KING attacks (1 square only)
+        elif piece == 'K' or piece == 'k':
+            if validate_king_move(source_square, target_square):
+                return True
+
+    return False
+
+def pawn_attacks_square(source, target, piece):
+    src_file = ord(source[0])
+    src_rank = int(source[1])
+
+    tgt_file = ord(target[0])
+    tgt_rank = int(target[1])
+
+    if piece == 'P':
+        return (
+            tgt_rank == src_rank + 1 and
+            abs(tgt_file - src_file) == 1
+        )
+
+    if piece == 'p':
+        return (
+            tgt_rank == src_rank - 1 and
+            abs(tgt_file - src_file) == 1
+        )
+
+    return False
 
 board = create_initial_board()
 moves = []
