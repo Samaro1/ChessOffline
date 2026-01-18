@@ -80,7 +80,6 @@ def validate_pawn(board, src, tgt, piece, last_move):
     direction = 1 if piece == "P" else -1
     start_rank = 2 if piece == "P" else 7
 
-    # forward
     if df == 0:
         if dr == direction and board[tgt] is None:
             return True
@@ -89,12 +88,10 @@ def validate_pawn(board, src, tgt, piece, last_move):
             if board[mid] is None and board[tgt] is None:
                 return True
 
-    # capture
     if abs(df) == 1 and dr == direction:
         if board[tgt] and board[tgt].isupper() != piece.isupper():
             return True
 
-        # en passant
         if last_move:
             last_from = last_move["from"]
             last_to = last_move["to"]
@@ -270,7 +267,6 @@ def validate_move(board, src, tgt, state):
     if not valid:
         return False
 
-    # simulate move to test for self-check
     snapshot = board.copy()
     board[tgt] = board[src]
     board[src] = None
@@ -280,6 +276,19 @@ def validate_move(board, src, tgt, state):
 
     return not illegal
 
+
+# =========================
+# APPLY EN PASSANR
+# =========================
+def apply_en_passant(board, src, tgt, piece):
+    """
+    Removes the pawn captured via en passant.
+    """
+    direction = 1 if piece == "P" else -1
+    captured_rank = int(tgt[1]) - direction
+    captured_square = tgt[0] + str(captured_rank)
+
+    board[captured_square] = None
 
 # =========================
 # APPLY MOVE
@@ -311,39 +320,44 @@ def apply_move(board, src, tgt, state):
 
 
 # =========================
-# GAME LOOP
+# GAME LOOP (CLI)
 # =========================
 
-board = create_initial_board()
-state = initial_game_state()
+def run_cli():
+    board = create_initial_board()
+    state = initial_game_state()
 
-while True:
-    print_board(board)
-    move = input(f"{state['turn']} move (e2 e4): ").split()
+    while True:
+        print_board(board)
+        move = input(f"{state['turn']} move (e2 e4): ").split()
 
-    if len(move) != 2:
-        print("Invalid input format")
-        continue
+        if len(move) != 2:
+            print("Invalid input format")
+            continue
 
-    src, tgt = move
-    if src not in board or tgt not in board:
-        print("Invalid square")
-        continue
+        src, tgt = move
+        if src not in board or tgt not in board:
+            print("Invalid square")
+            continue
 
-    piece = board[src]
-    if piece is None:
-        print("No piece on source square")
-        continue
+        piece = board[src]
+        if piece is None:
+            print("No piece on source square")
+            continue
 
-    if state["turn"] == "white" and not is_white(piece):
-        print("White to move")
-        continue
-    if state["turn"] == "black" and not is_black(piece):
-        print("Black to move")
-        continue
+        if state["turn"] == "white" and not is_white(piece):
+            print("White to move")
+            continue
+        if state["turn"] == "black" and not is_black(piece):
+            print("Black to move")
+            continue
 
-    if not validate_move(board, src, tgt, state):
-        print("Illegal move")
-        continue
+        if not validate_move(board, src, tgt, state):
+            print("Illegal move")
+            continue
 
-    apply_move(board, src, tgt, state)
+        apply_move(board, src, tgt, state)
+
+
+if __name__ == "__main__":
+    run_cli()

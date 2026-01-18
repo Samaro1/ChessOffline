@@ -5,7 +5,8 @@ from gamelogic import (
     apply_en_passant,
     apply_castling,
     find_king,
-    is_square_attacked
+    is_square_attacked,
+    initial_game_state
 )
 
 def assert_true(condition, message):
@@ -19,10 +20,10 @@ def assert_false(condition, message):
 
 def test_pawn_forward():
     board = create_initial_board()
-    assert_true(
-        validate_move(board, "e2", "e3"),
-        "Pawn should move forward one square"
-    )
+    state = initial_game_state()
+
+    assert validate_move(board, "e2", "e3", state)
+
 
 def test_pawn_blocked():
     board = create_initial_board()
