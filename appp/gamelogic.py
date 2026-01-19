@@ -318,6 +318,77 @@ def apply_move(board, src, tgt, state):
 
     state["turn"] = opponent(state["turn"])
 
+# =========================
+#STALEMATE FUNCTION
+#==========================
+def is_stalemate(board, state):
+    current_turn = state["turn"]
+
+    # 1. If king is in check, it cannot be stalemate
+    if is_in_check(board, current_turn, state):
+        return False
+
+    # 2. Loop through all pieces on the board
+    for src_square, piece in board.items():
+        if piece is None:
+            continue
+
+        # Skip opponent pieces
+        if current_turn == "white" and piece.islower():
+            continue
+        if current_turn == "black" and piece.isupper():
+            continue
+
+        # 3. Try moving this piece to every square on the board
+        for tgt_square in board.keys():
+            if src_square == tgt_square:
+                continue
+
+            if validate_move(board, src_square, tgt_square, state):
+                # Found at least one legal move → not stalemate
+                return False
+
+    # 4. No legal moves found and king is not in check
+    return True
+
+# =========================
+#CHECKMATE FUNCTION
+#==========================
+def check_checkmate(board, state):
+    """
+    Returns True if the current player is in checkmate.
+    Logic:
+    1. If the king is NOT in check → cannot be checkmate.
+    2. Loop through all pieces of the player whose turn it is.
+    3. For each piece, try moving it to every square.
+    4. If any valid move removes the king from check → not checkmate.
+    5. If no moves can save the king → checkmate.
+    """
+    color = state["turn"]
+    last_move = state["moves"][-1] if state["moves"] else None
+
+    # Step 1: king must be in check
+    if not is_in_check(board, color, last_move):
+        return False
+
+    # Step 2: loop through all pieces of current color
+    for src, piece in board.items():
+        if piece is None:
+            continue
+        if color == "white" and not is_white(piece):
+            continue
+        if color == "black" and not is_black(piece):
+            continue
+
+        # Step 3: try moving this piece to all possible squares
+        for tgt in board.keys():
+            if src == tgt:
+                continue
+            if validate_move(board, src, tgt, state):
+                return False  # found at least one move that saves the king
+
+    # Step 4: no moves found → checkmate
+    return True
 
 # =========================
 # GAME LOOP (CLI)
@@ -361,3 +432,4 @@ def run_cli():
 
 if __name__ == "__main__":
     run_cli()
+
