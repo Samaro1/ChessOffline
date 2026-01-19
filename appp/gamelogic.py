@@ -400,34 +400,38 @@ def run_cli():
 
     while True:
         print_board(board)
-        move = input(f"{state['turn']} move (e2 e4): ").split()
 
-        if len(move) != 2:
-            print("Invalid input format")
+        # Check for endgame
+        color = state["turn"]
+        if check_checkmate(board, state):
+            print(f"Checkmate! {opponent(state['turn']).capitalize()} wins!")
+            break
+
+        if is_stalemate(board, state):
+            print("Stalemate! It's a draw.")
+            break
+
+
+        # Ask for move
+        move_input = input(f"{color.capitalize()} move (e2 e4): ").split()
+        if len(move_input) != 2:
+            print("Invalid input format. Use: source target")
             continue
 
-        src, tgt = move
+        src, tgt = move_input
         if src not in board or tgt not in board:
             print("Invalid square")
             continue
 
-        piece = board[src]
-        if piece is None:
-            print("No piece on source square")
-            continue
-
-        if state["turn"] == "white" and not is_white(piece):
-            print("White to move")
-            continue
-        if state["turn"] == "black" and not is_black(piece):
-            print("Black to move")
-            continue
-
+        # Validate move
         if not validate_move(board, src, tgt, state):
             print("Illegal move")
             continue
 
+        # Apply move
         apply_move(board, src, tgt, state)
+
+        # Loop continues with next turn
 
 
 if __name__ == "__main__":
