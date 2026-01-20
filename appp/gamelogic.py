@@ -411,7 +411,6 @@ def run_cli():
             print("Stalemate! It's a draw.")
             break
 
-
         # Ask for move
         move_input = input(f"{color.capitalize()} move (e2 e4): ").split()
         if len(move_input) != 2:
