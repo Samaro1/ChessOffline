@@ -52,7 +52,6 @@ def initial_game_state():
         }
     }
 
-
 # =========================
 # BASIC HELPERS
 # =========================
@@ -87,11 +86,11 @@ def validate_pawn(board, src, tgt, piece, last_move):
             mid = sf + str(sr + direction)
             if board[mid] is None and board[tgt] is None:
                 return True
-
+#CAPTURING PIECE 
     if abs(df) == 1 and dr == direction:
         if board[tgt] and board[tgt].isupper() != piece.isupper():
             return True
-
+#EN PASSANT CAPTURE
         if last_move:
             last_from = last_move["from"]
             last_to = last_move["to"]
