@@ -181,7 +181,6 @@ def is_in_check(board, color, last_move):
     king_sq = find_king(board, color)
     return is_square_attacked(board, king_sq, opponent(color), last_move)
 
-
 # =========================
 # CASTLING
 # =========================
