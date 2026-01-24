@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from gamemanager import GameManager
-
+games= {}
 app = Flask(__name__)
 manager = GameManager()
 
@@ -41,18 +41,16 @@ def move(game_id):
 
     return jsonify(result)
 
-def has_insufficient_material(board):
-    pieces = [p.lower() for p in board.values() if p]
+@app.route("/game/<game_id>/replay", methods=["GET"])
+def game_replay(game_id):
+    game = games.get(game_id)
+    if not game:
+        return jsonify({"error": "Game not found"}), 404
 
-    # Remove kings
-    pieces = [p for p in pieces if p != "k"]
+    return jsonify({
+        "moves": game["state"]["moves"],
+        "result": game["state"].get("result", "ongoing")
+    })
 
-    if not pieces:
-        return True  # K vs K
-
-    if len(pieces) == 1 and pieces[0] in ("b", "n"):
-        return True  # K+B vs K or K+N vs K
-
-    return False
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
