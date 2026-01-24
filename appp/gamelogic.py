@@ -316,6 +316,23 @@ def apply_move(board, src, tgt, state):
 
     state["turn"] = opponent(state["turn"])
 
+# ========
+# INSUFFICIENT MOVES
+#============
+def has_insufficient_material(board):
+    pieces = [p.lower() for p in board.values() if p]
+
+    # Remove kings
+    pieces = [p for p in pieces if p != "k"]
+
+    if not pieces:
+        return True  # K vs K
+
+    if len(pieces) == 1 and pieces[0] in ("b", "n"):
+        return True  # K+B vs K or K+N vs K
+
+    return False
+
 # =========================
 #STALEMATE FUNCTION
 #==========================
