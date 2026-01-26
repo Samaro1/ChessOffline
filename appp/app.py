@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from gamemanager import GameManager
+
 games= {}
 app = Flask(__name__)
 manager = GameManager()
@@ -54,3 +55,37 @@ def game_replay(game_id):
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
+
+
+@app.route("/game/<game_id>/move", methods=["POST"])
+def make_move(game_id):
+    game = games.get(game_id)
+    if not game:
+        return jsonify({"error": "Game not found"}), 404
+
+    board = game["board"]
+    state = game["state"]
+
+    if state["game_over"]:
+        return jsonify({"error": "Game already finished"}), 400
+
+    data = request.json
+    src = data.get("from")
+    tgt = data.get("to")
+
+    if not validate_move(board, src, tgt, state):
+        return jsonify({"error": "Illegal move"}), 400
+
+    apply_move(board, src, tgt, state)
+
+    result = resolve_game_end(board, state)
+    if result:
+        return jsonify({
+            "status": result,
+            "turn": state["turn"]
+        })
+
+    return jsonify({
+        "status": "ok",
+        "turn": state["turn"]
+    })

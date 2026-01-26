@@ -45,12 +45,26 @@ def initial_game_state():
     return {
         "turn": "white",
         "moves": [],
-        "king_moved": {"white": False, "black": False},
-        "rook_moved": {
-            "white": {"a": False, "h": False},
-            "black": {"a": False, "h": False},
-        }
+        "halfmove_clock": 0,
+        "position_history": [],
+        "result": None,          # checkmate or stalemate or draw
+        "game_over": False
     }
+
+#===============
+# DRAW BY REPITITION
+#===================
+def is_draw(board, state):
+    """
+    Non-stalemate draws live here.
+    Currently supports:
+    - 50-move rule (halfmove clock)
+    - repetition (later)
+    """
+    if state["halfmove_clock"] >= 100:
+        return True
+
+    return False
 
 # =========================
 # BASIC HELPERS
@@ -405,10 +419,30 @@ def check_checkmate(board, state):
     # Step 4: no moves found → checkmate
     return True
 
+#===========================
+# GAME END STATE
+#==========================
+def resolve_game_end(board, state):
+    if check_checkmate(board, state):
+        state["game_over"] = True
+        state["result"] = "checkmate"
+        return "checkmate"
+
+    if is_stalemate(board, state):
+        state["game_over"] = True
+        state["result"] = "stalemate"
+        return "stalemate"
+
+    if is_draw(board, state):
+        state["game_over"] = True
+        state["result"] = "draw"
+        return "draw"
+
+    return None
+
 # =========================
 # GAME LOOP (CLI)
 # =========================
-
 def run_cli():
     board = create_initial_board()
     state = initial_game_state()
@@ -416,36 +450,27 @@ def run_cli():
     while True:
         print_board(board)
 
-        # Check for endgame
-        color = state["turn"]
-        if check_checkmate(board, state):
-            print(f"Checkmate! {opponent(state['turn']).capitalize()} wins!")
+        if state["game_over"]:
+            print(f"Game over: {state['result']}")
             break
 
-        if is_stalemate(board, state):
-            print("Stalemate! It's a draw.")
+        result = resolve_game_end(board, state)
+        if result:
+            print(f"Game over: {result}")
             break
 
-        # Ask for move
-        move_input = input(f"{color.capitalize()} move (e2 e4): ").split()
-        if len(move_input) != 2:
-            print("Invalid input format. Use: source target")
+        move = input(f"{state['turn']} move (e2 e4): ").split()
+        if len(move) != 2:
+            print("Invalid input")
             continue
 
-        src, tgt = move_input
-        if src not in board or tgt not in board:
-            print("Invalid square")
-            continue
+        src, tgt = move
 
-        # Validate move
         if not validate_move(board, src, tgt, state):
             print("Illegal move")
             continue
 
-        # Apply move
         apply_move(board, src, tgt, state)
-
-        # Loop continues with next turn
 
 
 if __name__ == "__main__":
