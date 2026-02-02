@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
-from gamemanager import GameManager
+from gamemanager import GameManager, validate_move,apply_move
+from gamelogic import resolve_game_end
 
 games= {}
 app = Flask(__name__)
