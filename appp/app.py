@@ -1,10 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from gamemanager import GameManager, validate_move,apply_move
 from gamelogic import resolve_game_end
 
 games= {}
 app = Flask(__name__)
 manager = GameManager()
+
+@app.route("/", methods=["POST"])
+def index_page():
+    return render_template('index.html')
 
 @app.route("/game", methods=["POST"])
 def create_game():
@@ -54,10 +58,6 @@ def game_replay(game_id):
         "result": game["state"].get("result", "ongoing")
     })
 
-if __name__ == "__main__":
-    app.run(debug=True, port=5001)
-
-
 @app.route("/game/<game_id>/move", methods=["POST"])
 def make_move(game_id):
     game = games.get(game_id)
@@ -90,3 +90,6 @@ def make_move(game_id):
         "status": "ok",
         "turn": state["turn"]
     })
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5001)
