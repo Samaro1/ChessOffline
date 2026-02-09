@@ -1,0 +1,24 @@
+body{
+    background-size: cover;
+    background-position: center;
+}
+body.light{
+    background-color: #FFFFFF;
+    background-image: url(../images/light/bgmosaic.png);
+    background-repeat: repeat;
+}
+
+body.dark{
+    background-color: #662E2E;
+    background-image: url(../images/dark/bgmosaic.png);
+
+}
+
+body.light .topbar{
+    background-color: #FFFFFF;
+
+}
+
+body.dark .topbar{
+    background-color: #662E2E;
+}

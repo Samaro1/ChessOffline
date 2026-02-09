@@ -4,20 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Chess Offline </title>
-    <link rel="stylesheet" href="{{url_for('static' filename= 'css/base.css') }}">
+    <link rel="stylesheet" href="{{url_for('static', filename= 'css/base.css') }}">
 </head>
-<body>
+
+<body class="{{ theme }}">
     {% block body %}
     
-
     {% set theme = theme or 'light' %}
     {% set themepath = 'images/' ~ theme %}
 
     <div class="topbar">
-        <h1>The Chess Offline</h1>
-        <img src="{{url_for('static',filename= themepath ~ '/iconswitch.jpg') }}" alt="Theme Icon Toggle">
+        <h1 class="topname"> The Chess Offline</h1>
+        <button>
+                <img src="{{url_for('static',filename= themepath ~ '/iconswitch.jpg') }}" alt="Theme Icon Toggle">
+        </button>
     </div>
 
-    {% block body %}
+    {% endblock %}
 </body>
+
 </html>

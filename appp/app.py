@@ -1,14 +1,19 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template,session
 from gamemanager import GameManager, validate_move,apply_move
 from gamelogic import resolve_game_end
 
 games= {}
 app = Flask(__name__)
+app.secret_key= "secret"
 manager = GameManager()
+
+@app.context_processor
+def injecy_theme():
+    return dict(theme=session.get('theme','light'))
 
 @app.route("/")
 def index_page():
-    return render_template('index.html')
+    return render_template('base.html')
 
 @app.route("/game", methods=["POST"])
 def create_game():
