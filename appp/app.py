@@ -6,7 +6,7 @@ games= {}
 app = Flask(__name__)
 manager = GameManager()
 
-@app.route("/", methods=["POST"])
+@app.route("/")
 def index_page():
     return render_template('index.html')
 
