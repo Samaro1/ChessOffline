@@ -1,42 +1,74 @@
-body{
-    background-position: center;
-    background-size: 25%;
-    /* background-position: top left; */
-    background-blend-mode: darken;
+body {
+    position: relative;
+    min-height: 100vh;
 }
-/* Mobile view  */
+
+/* Background layer */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+
+    background-position: center;
+    background-repeat: repeat;
+    background-size: 25%;
+
+    opacity: 0.4;
+
+    z-index: -1;
+}
+
+/* Mobile view */
 @media (max-width: 768px) {
-    body{
+    body::before {
         background-size: 100px 100px;
     }
 }
-body.light{
+
+/* Light theme */
+body.light {
     background-color: #FFFFFF;
+}
+
+body.light::before {
     background-image: url(../images/light/bgmosaic.png);
-    background-repeat: repeat;
 }
 
-body.dark{
+/* Dark theme */
+body.dark {
     background-color: #662E2E;
-    background-image: url(../images/dark/bgmosaic.png);
-
 }
 
-body .topbar{
+body.dark::before {
+    background-image: url(../images/dark/bgmosaic.png);
+}
+
+body .topbar {
     display: flex;
     justify-content: center;
-}
-
-body.light .topbar{
-    background-color: #FFFFFF;
 
 }
 
-body.dark .topbar{
-    background-color: #662E2E;
+body.light .topbar {
+    background-color: rgba(255, 255, 255, 0.149);
 }
 
-body .toggle{
+body.dark .topbar {
+    background-color: rgba(102, 46, 46, 0.464);
+}
+
+body .toggle {
     display: flex;
+}
 
+body.dark .topname{
+    color: #FAF7F7;
+}
+
+body.dark .theme-toggle{
+    background-color:  rgba(102, 46, 46, 0.464);
+}
+
+body.light .theme-toggle{
+    background-color: rgba(255, 255, 255, 0.149);
 }

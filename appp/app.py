@@ -9,7 +9,7 @@ manager = GameManager()
 
 @app.context_processor
 def injecy_theme():
-    return dict(theme=session.get('theme','light'))
+    return dict(theme=session.get('theme','dark'))
 
 @app.route("/")
 def index_page():
