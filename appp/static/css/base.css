@@ -1,6 +1,14 @@
 body{
-    background-size: cover;
     background-position: center;
+    background-size: 25%;
+    /* background-position: top left; */
+    background-blend-mode: darken;
+}
+/* Mobile view  */
+@media (max-width: 768px) {
+    body{
+        background-size: 100px 100px;
+    }
 }
 body.light{
     background-color: #FFFFFF;
@@ -14,6 +22,11 @@ body.dark{
 
 }
 
+body .topbar{
+    display: flex;
+    justify-content: center;
+}
+
 body.light .topbar{
     background-color: #FFFFFF;
 
@@ -21,4 +34,9 @@ body.light .topbar{
 
 body.dark .topbar{
     background-color: #662E2E;
+}
+
+body .toggle{
+    display: flex;
+
 }
