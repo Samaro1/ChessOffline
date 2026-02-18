@@ -13,7 +13,8 @@ def injecy_theme():
 
 @app.route("/")
 def index_page():
-    return render_template('base.html')
+    #Adding the pawn parameter for the type of piece in the logo
+    return render_template('base.html', piece= "pawn")
 
 @app.route("/game", methods=["POST"])
 def create_game():
