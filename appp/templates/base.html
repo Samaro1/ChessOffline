@@ -29,14 +29,13 @@
 
         </button>
     </div>
-
+    {% if piece %}
     <div class="logodiv">
-        {% if piece %}
         <img class="logo"
              src="{{ url_for('static', filename='images/' + piece + '.svg') }}"
              alt="{{ piece }}">
-        {% endif %}
     </div>
+    {% endif %}
 
     {% endblock %}  
 </body>
