@@ -136,3 +136,26 @@ body.light .topbar {
 body.dark .topbar {
     background-color: rgba(102, 46, 46, 0.46);
 }
+
+/* Logo  */
+.logodiv {
+    width: clamp(50px, 8vw, 100px);
+    height: clamp(50px, 8vw, 100px);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo {
+    width: 55%;
+    height: auto;
+}
+
+body.light .logo{
+    fill: #FFFFFF;
+}
+
+body.dark .logo{
+    fill: #662E2E;
+}
