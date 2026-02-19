@@ -160,10 +160,10 @@ body.dark .topbar {
     height: auto;
 }
 
-body.light .logo{
-    fill: #FFFFFF;
+body.light .logo {
+    filter: invert(0);
 }
 
-body.dark .logo{
-    fill: #251b99;
+body.dark .logo {
+    filter: invert(1);
 }

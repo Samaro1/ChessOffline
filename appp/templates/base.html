@@ -32,8 +32,9 @@
     {% if piece %}
     <div class="logodiv">
         <img class="logo"
-             src="{{ url_for('static', filename='images/' + piece + '.svg') }}"
-             alt="{{ piece }}">
+            src="{{ url_for('static',
+                filename='images/' + theme + '/' + piece + '.svg') }}"
+            alt="{{ piece }}">
     </div>
     {% endif %}
 
