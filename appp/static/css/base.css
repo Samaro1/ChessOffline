@@ -159,11 +159,3 @@ body.dark .topbar {
     width: 55%;
     height: auto;
 }
-
-body.light .logo {
-    filter: invert(0);
-}
-
-body.dark .logo {
-    filter: invert(1);
-}
