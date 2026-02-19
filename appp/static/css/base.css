@@ -147,6 +147,14 @@ body.dark .topbar {
     align-items: center;
 }
 
+.logodiv{
+    fill: #662E2E;
+}
+
+.logodiv{
+    fill: #FFFFFF;
+}
+
 .logo {
     width: 55%;
     height: auto;
